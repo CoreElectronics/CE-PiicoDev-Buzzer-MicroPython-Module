@@ -4,9 +4,17 @@
 
 // ToDo
 void setTone(char *data) {
-  uint16_t frequency = (data[0] << 8) || data[1];
-  uint16_t duration = (data[2] << 8) || data[3];
-  tone(frequency, duration);
+  frequency = (uint8_t(data[0]) << 8) + uint8_t(data[1]);
+  duration = (uint8_t(data[2]) << 8) + uint8_t(data[3]);
+  updateFlag = true;
+}
+
+void playTone(void) {
+  if (duration == 0){
+    tone(buzzerPin, frequency);
+  } else {
+    tone(buzzerPin, frequency, duration);
+  }
 }
 
 // ToDo

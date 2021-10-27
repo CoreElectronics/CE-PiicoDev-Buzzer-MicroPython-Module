@@ -12,7 +12,7 @@
 #define FIRMWARE_MAJOR 0x01
 #define FIRMWARE_MINOR 0x00
 
-#define DEVICE_ID 0x50
+#define DEVICE_ID 0x51
 #define DEFAULT_I2C_ADDRESS 0x08
 #define SOFTWARE_ADDRESS true
 #define HARDWARE_ADDRESS false
@@ -28,7 +28,7 @@ uint8_t oldAddress;
 // Hardware Connectins
 #if defined(__AVR_ATtiny806__)
 const uint8_t powerLedPin = PIN_PC2;
-const uint16_t buzzerPin = PIN_PA1;
+const uint16_t buzzerPin = PIN_PA2;
 
 const uint8_t addressPin1 = PIN_PA7;
 const uint8_t addressPin2 = PIN_PB5;
@@ -51,7 +51,10 @@ const uint8_t addressPin4 = PIN_PB2;
 volatile bool updateFlag = true; // Goes true when new data received. Cause LEDs to update
 volatile unsigned long lastSyncTime = 0;
 
-#define LOCAL_BUFFER_SIZE 6 // bytes
+volatile uint16_t frequency = 0;
+volatile uint16_t duration = 0;
+
+#define LOCAL_BUFFER_SIZE 20 // bytes
 byte incomingData[LOCAL_BUFFER_SIZE]; //Local buffer to record I2C bytes before committing to file, add 1 for 0 character on end
 volatile int incomingDataSpot = 0; //Keeps track of where we are in the incoming buffer
 
@@ -76,6 +79,7 @@ struct memoryMap {
   uint8_t i2cAddress;
   uint16_t tone;
   uint8_t volume;
+  uint8_t led;
 };
 
 // Register addresses.
@@ -87,6 +91,7 @@ const memoryMap registerMap = {
   .i2cAddress = 0x04,
   .tone = 0x05,
   .volume = 0x06,
+  .led = 0x07,
 };
 
 volatile memoryMap valueMap = {
@@ -97,6 +102,7 @@ volatile memoryMap valueMap = {
   .i2cAddress = DEFAULT_I2C_ADDRESS,
   .tone = 0x00,
   .volume = 0x00,
+  .led = 0x01
 };
 
 uint8_t currentRegisterNumber;
@@ -113,6 +119,7 @@ void firmwareMinorReturn(char *data);
 void setAddress(char *data);
 void setTone(char *data);
 void setVolume(char *data);
+void setPowerLed(char *data);
 
 functionMap functions[] = {
   {registerMap.id, idReturn},
@@ -121,7 +128,8 @@ functionMap functions[] = {
   {registerMap.firmwareMinor, firmwareMinorReturn},
   {registerMap.i2cAddress, setAddress},
   {registerMap.tone, setTone},
-  {registerMap.volume, setVolume}
+  {registerMap.volume, setVolume},
+  {registerMap.led, setPowerLed},
 };
 
 
@@ -166,13 +174,7 @@ void loop() {
   // }
 
   if (updateFlag) {
-    // Power LED - open drain so toggle between output-low and high-impedance input
-    // static bool lastPowerLed = true;
-    // if (registerMap.control.pwrLedCtl != lastPowerLed) {
-    //   lastPowerLed = registerMap.control.pwrLedCtl;
-    //   powerLed(registerMap.control.pwrLedCtl);
-    // }
-
+    playTone();
     //Record anything new to EEPROM (like new LED values)
     //It can take a handful of ms to write a byte to EEPROM so we do that here instead of in an interrupt
     recordSystemSettings();
