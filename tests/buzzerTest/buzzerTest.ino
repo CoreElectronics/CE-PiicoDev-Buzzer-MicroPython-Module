@@ -1,7 +1,7 @@
 #include <stdint.h>
 #define NUM(a) (sizeof(a) / sizeof(*a))
 
-const uint16_t buzzerPin = PIN_PA2;
+const uint16_t buzzerPin = PIN_PA3;
 
 const uint16_t ScaleCmaj[] = {262, 294, 330, 349, 392, 440, 493, 523};
 
