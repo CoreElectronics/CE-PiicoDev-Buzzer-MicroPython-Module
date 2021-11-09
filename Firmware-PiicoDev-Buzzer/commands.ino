@@ -10,6 +10,9 @@ void setTone(char *data) {
 }
 
 void playTone(void) {
+  if (frequency == 0){ // stop playing
+    noTone(buzzerPin);
+  }
   if (duration == 0){
     tone(buzzerPin, frequency);
   } else {
@@ -17,11 +20,20 @@ void playTone(void) {
   }
 }
 
-// ToDo
 void setVolume(char *data) {
-  return;
+  uint8_t vol = data[0];
+  if (vol >=0 && vol <=2) volume(uint8_t(data[0]));
 }
 
+void volume(uint8_t vol) {
+  pinMode(PIN_PA3, INPUT);
+  pinMode(PIN_PA2, INPUT);
+  pinMode(PIN_PA1, INPUT);
+  if(vol == 0) buzzerPin = PIN_PA3;
+  if(vol == 1) buzzerPin = PIN_PA1;
+  if(vol == 2) buzzerPin = PIN_PA2;
+  pinMode(buzzerPin, OUTPUT);
+}
 
 
 void idReturn(char *data) {

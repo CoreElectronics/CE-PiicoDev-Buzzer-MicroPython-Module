@@ -1,7 +1,8 @@
 // Wire I2C Receiver
+#define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 
 
-#define DEBUG 1
+#define DEBUG 0
 
 #include <Wire.h>
 #include <EEPROM.h>
@@ -26,9 +27,11 @@ enum eepromLocations {
 uint8_t oldAddress;
 
 // Hardware Connectins
-#if defined(__AVR_ATtiny806__)
+#if defined(__AVR_ATtiny806__) || defined(__AVR_ATtiny816__)
 const uint8_t powerLedPin = PIN_PC2;
-const uint16_t buzzerPin = PIN_PA2;
+const uint16_t buzzerPins[] = {PIN_PA3, PIN_PA1, PIN_PA2}; // In ascending order of loudness
+const uint16_t buzzerCommon = PIN_PA4; // provision for push-pull drive. Unused for now...
+uint16_t buzzerPin = PIN_PA2;
 
 const uint8_t addressPin1 = PIN_PA7;
 const uint8_t addressPin2 = PIN_PB5;
@@ -134,19 +137,19 @@ functionMap functions[] = {
 
 
 
-
 void setup() {
 
 #if DEBUG
   #if defined(__AVR_ATtiny806__)
-  Serial.pins(PIN_PA1, PIN_PA2);  // For Xplained Nano breakout
+//  Serial.pins(PIN_PA1, PIN_PA2);  // For Xplained Nano breakout
   #endif
 
   Serial.begin(115200);
   Serial.println("Begin");
 #endif
 
-  pinMode(buzzerPin, OUTPUT);
+  pinMode(buzzerCommon, OUTPUT); digitalWrite(buzzerCommon, LOW);
+  
   // Pull up address pins
   pinMode(addressPin1, INPUT_PULLUP);
   pinMode(addressPin2, INPUT_PULLUP);
