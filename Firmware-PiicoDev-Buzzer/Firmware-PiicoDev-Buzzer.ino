@@ -1,4 +1,14 @@
-// Wire I2C Receiver
+/*
+ * PiicoDev 3x RGB LED Module Firmware
+ * Written by Michael Ruppe @ Core Electronics
+ * Based off the Qwiic Button Project https://github.com/sparkfun/Qwiic_Button
+ * Date: NOV 2021
+ * An I2C based LED module that allows control of 3x GlowBit (WS2812) LEDs
+ *
+ * Feel like supporting PiicoDev? Buy a module here: https://core-electronics.com.au/catalog/product/view/sku/CE07910
+ */
+
+ 
 #define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 
 
@@ -54,8 +64,8 @@ const uint8_t addressPin4 = PIN_PB2;
 volatile bool updateFlag = true; // Goes true when new data received. Cause LEDs to update
 volatile unsigned long lastSyncTime = 0;
 
-volatile uint16_t frequency = 0;
-volatile uint16_t duration = 0;
+// volatile uint16_t frequency = 0;
+// volatile uint16_t duration = 0;
 
 #define LOCAL_BUFFER_SIZE 20 // bytes
 byte incomingData[LOCAL_BUFFER_SIZE]; //Local buffer to record I2C bytes before committing to file, add 1 for 0 character on end
@@ -87,7 +97,7 @@ struct memoryMap {
 
 // Register addresses.
 const memoryMap registerMap = {
-  .id = 0x00,
+  .id = 0x11,
   .status = 0x01,
   .firmwareMajor = 0x02,
   .firmwareMinor = 0x03,
@@ -140,16 +150,12 @@ functionMap functions[] = {
 void setup() {
 
 #if DEBUG
-  #if defined(__AVR_ATtiny806__)
-//  Serial.pins(PIN_PA1, PIN_PA2);  // For Xplained Nano breakout
-  #endif
-
   Serial.begin(115200);
   Serial.println("Begin");
 #endif
 
   pinMode(buzzerCommon, OUTPUT); digitalWrite(buzzerCommon, LOW);
-  
+
   // Pull up address pins
   pinMode(addressPin1, INPUT_PULLUP);
   pinMode(addressPin2, INPUT_PULLUP);
@@ -168,22 +174,10 @@ void setup() {
 }
 
 void loop() {
-  // // Check to see if the I2C address has been updated by software, set the appropriate address-type flag
-  // if (oldAddress != registerMap.i2cAddress)
-  // {
-  //   oldAddress = registerMap.i2cAddress;
-  //   EEPROM.put(LOCATION_ADDRESS_TYPE, SOFTWARE_ADDRESS);
-  //   startI2C();
-  // }
-
   if (updateFlag) {
-    playTone();
-    //Record anything new to EEPROM (like new LED values)
-    //It can take a handful of ms to write a byte to EEPROM so we do that here instead of in an interrupt
-    recordSystemSettings();
+    startI2C(); // reinitialise I2C with new address, update EEPROM with custom address as necessary
     updateFlag = false;
   }
-
   sleep_mode();
 }
 
@@ -231,7 +225,7 @@ void startI2C()
   //save new address to the register map
   valueMap.i2cAddress = address;
 
-  // recordSystemSettings();  // ToDo uncomment
+  recordSystemSettings(); // save the new address to EEPROM
 
   //reconfigure Wire instance
   Wire.end();          //stop I2C on old address

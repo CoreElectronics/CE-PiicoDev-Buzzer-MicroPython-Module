@@ -27,20 +27,15 @@ void recordSystemSettings(void)
   byte i2cAddr;
 
   //Error check the current I2C address
-  if (valueMap.i2cAddress >= 0x08 && valueMap.i2cAddress <= 0x77)
-  {
+  if (valueMap.i2cAddress >= 0x08 && valueMap.i2cAddress <= 0x77) {
     //Address is valid
     //Read the value currently in EEPROM. If it's different from the memory map then record the memory map value to EEPROM.
     EEPROM.get(LOCATION_I2C_ADDRESS, i2cAddr);
     if (i2cAddr != valueMap.i2cAddress)
     {
       EEPROM.put(LOCATION_I2C_ADDRESS, (byte)valueMap.i2cAddress);
-      // TODO uncomment
-      // startI2C(); //Determine the I2C address we should be using and begin listening on I2C bus
     }
-  }
-  else
-  {
+  } else {
     EEPROM.get(LOCATION_I2C_ADDRESS, i2cAddr);
     valueMap.i2cAddress == i2cAddr; //Return to original address
   }

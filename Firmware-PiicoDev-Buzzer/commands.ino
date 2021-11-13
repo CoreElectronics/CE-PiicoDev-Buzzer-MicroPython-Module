@@ -2,14 +2,13 @@
   User accessible functions
 */
 
-// ToDo
 void setTone(char *data) {
-  frequency = (uint8_t(data[0]) << 8) + uint8_t(data[1]);
-  duration = (uint8_t(data[2]) << 8) + uint8_t(data[3]);
-  updateFlag = true;
+  uint16_t frequency = (uint8_t(data[0]) << 8) + uint8_t(data[1]);
+  uint16_t duration = (uint8_t(data[2]) << 8) + uint8_t(data[3]);
+  playTone(frequency, duration);
 }
 
-void playTone(void) {
+void playTone(uint16_t frequency, uint16_t duration) {
   if (frequency == 0){ // stop playing
     noTone(buzzerPin);
   }
@@ -26,36 +25,36 @@ void setVolume(char *data) {
 }
 
 void volume(uint8_t vol) {
-  pinMode(PIN_PA3, INPUT);
-  pinMode(PIN_PA2, INPUT);
-  pinMode(PIN_PA1, INPUT);
-  if(vol == 0) buzzerPin = PIN_PA3;
-  if(vol == 1) buzzerPin = PIN_PA1;
-  if(vol == 2) buzzerPin = PIN_PA2;
+  // Reset all buzzer pins
+  for (uint8_t i = 0; i < COUNT_OF(buzzerPins); i++) {
+    pinMode(buzzerPins[i], INPUT);
+  }
+  // Select the desired pin to use
+  buzzerPin = buzzerPins[vol];
   pinMode(buzzerPin, OUTPUT);
 }
 
 
 void idReturn(char *data) {
-  // responseType = RESPONSE_VALUE;
+  responseType = RESPONSE_VALUE;
   loadArray((byte)valueMap.id);
   valueMap.status |= (1 << STATUS_LAST_COMMAND_SUCCESS); //Command success
 }
 
 void statusReturn(char *data) {
-  // responseType = RESPONSE_VALUE;
+  responseType = RESPONSE_VALUE;
   loadArray((byte)valueMap.status);
   valueMap.status |= (1 << STATUS_LAST_COMMAND_SUCCESS); //Command successful. Set status bit.
 }
 
 void firmwareMajorReturn(char *data) {
-  // responseType = RESPONSE_VALUE;
+  responseType = RESPONSE_VALUE;
   loadArray((byte)valueMap.firmwareMajor);
   valueMap.status |= (1 << STATUS_LAST_COMMAND_SUCCESS); //Command success
 }
 
 void firmwareMinorReturn(char *data) {
-  // responseType = RESPONSE_VALUE;
+  responseType = RESPONSE_VALUE;
   loadArray((byte)valueMap.firmwareMinor);
   valueMap.status |= (1 << STATUS_LAST_COMMAND_SUCCESS); //Command success
 }
@@ -74,31 +73,16 @@ void powerLed(bool state) {
 }
 
 void setAddress(char *data) {
-  return;
-  // byte tempAddress = data[0];
-  //
-  // if (tempAddress < 0x08 || tempAddress > 0x77)
-  //   return; //Command failed. This address is out of bounds.
-  // valueMap.i2cAddress = tempAddress;
-  //
-  // //Our I2C address may have changed because of user's command
-  // // startI2C(); //Determine the I2C address we should be using and begin listening on I2C bus
-  // EEPROM.put(LOCATION_ADDRESS_TYPE, SOFTWARE_ADDRESS);
-  // startI2C();
-  // recordSystemSettings();
-  // valueMap.status |= (1 << STATUS_LAST_COMMAND_SUCCESS);
+  byte tempAddress = data[0];
+
+  if (tempAddress < 0x08 || tempAddress > 0x77)
+    return; //Command failed. This address is out of bounds.
+  valueMap.i2cAddress = tempAddress;
+
+  EEPROM.put(LOCATION_ADDRESS_TYPE, SOFTWARE_ADDRESS);
+  valueMap.status |= (1 << STATUS_LAST_COMMAND_SUCCESS);
+  updateFlag = true; // will trigger a I2C re-initalise and save custom address to EEPROM
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 //Loads a long into the start of the responseBuffer
