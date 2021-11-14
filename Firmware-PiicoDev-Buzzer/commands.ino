@@ -2,6 +2,10 @@
   User accessible functions
 */
 
+// Macro for number of elements in an array
+#define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
+
+
 void setTone(char *data) {
   uint16_t frequency = (uint8_t(data[0]) << 8) + uint8_t(data[1]);
   uint16_t duration = (uint8_t(data[2]) << 8) + uint8_t(data[3]);
@@ -21,7 +25,7 @@ void playTone(uint16_t frequency, uint16_t duration) {
 
 void setVolume(char *data) {
   uint8_t vol = data[0];
-  if (vol >=0 && vol <=2) volume(uint8_t(data[0]));
+  if (vol >=0 && vol < COUNT_OF(buzzerPins)) volume(uint8_t(data[0]));
 }
 
 void volume(uint8_t vol) {
