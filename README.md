@@ -27,7 +27,7 @@ Play a tone at `frequency` Hz for `duration` ms
 Parameter | Type | Default | Description
 --- | --- | --- | ---
 frequency | int |   | frequency of the tone in Hertz.
-frequency | int |   | duration of the tone in milliseconds. Tone is continuous if emitted.
+duration | int |   | duration of the tone in milliseconds. Tone is continuous if emitted.
 
 ### PiicoDev_Buzzer.noTone()
 Stop the buzzer
