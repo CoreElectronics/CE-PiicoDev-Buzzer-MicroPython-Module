@@ -8,7 +8,6 @@
  * Feel like supporting PiicoDev? Buy a module here: https://core-electronics.com.au/catalog/product/view/sku/CE07910
  */
 
-
 #define DEBUG 0
 
 #include <Wire.h>
