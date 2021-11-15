@@ -79,5 +79,5 @@ class PiicoDev_Buzzer(object):
 #                 print("* Incorrect device found at address {}".format(addr))
 #         except:
 #             print("* Couldn't find a device - check switches and wiring")
-#         
+#  
         
