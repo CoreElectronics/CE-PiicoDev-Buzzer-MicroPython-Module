@@ -6,6 +6,10 @@
  * An I2C based LED module that allows control of 3x GlowBit (WS2812) LEDs
  *
  * Feel like supporting PiicoDev? Buy a module here: https://core-electronics.com.au/catalog/product/view/sku/CE07910
+ *
+ * Changes in v1.1
+ *  Default address is now not shared with other smart modules
+ *  hardware address switches select from the same shared pool of addresses for smart modules
  */
 
 #define DEBUG 0
@@ -17,10 +21,11 @@
 #include <avr/power.h> // For powering-down peripherals such as ADC and Timers
 
 #define FIRMWARE_MAJOR 0x01
-#define FIRMWARE_MINOR 0x00
+#define FIRMWARE_MINOR 0x01
 
 #define DEVICE_ID 0x51
-#define DEFAULT_I2C_ADDRESS 0x08
+#define DEFAULT_I2C_ADDRESS 0x5C    // The default address when all switches are off
+#define I2C_ADDRESS_POOL_START 0x08 // The start of the 'smart module address pool' - addresses settable by switches
 #define SOFTWARE_ADDRESS true
 #define HARDWARE_ADDRESS false
 #define I2C_BUFFER_SIZE 32 //For ATmega328 based Arduinos, the I2C buffer is limited to 32 bytes
@@ -198,7 +203,7 @@ void startI2C()
   bitWrite(switchPositions, 1, !digitalRead(addressPin2));
   bitWrite(switchPositions, 2, !digitalRead(addressPin3));
   bitWrite(switchPositions, 3, !digitalRead(addressPin4));
-  IOaddress += switchPositions;
+  if (switchPositions != 0) IOaddress = I2C_ADDRESS_POOL_START + switchPositions; // use the "smart-module address pool" when any hardware address is set
 
   //If any of the address jumpers are set, we use jumpers
   if ((IOaddress != DEFAULT_I2C_ADDRESS) || (addressType == HARDWARE_ADDRESS))
