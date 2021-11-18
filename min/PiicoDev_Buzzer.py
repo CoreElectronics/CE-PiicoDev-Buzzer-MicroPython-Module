@@ -1,7 +1,7 @@
 _B='big'
 _A=None
 from PiicoDev_Unified import *
-_baseAddr=8
+_baseAddr=92
 _DevID=81
 _regDevID=17
 _regStatus=1
@@ -36,7 +36,7 @@ class PiicoDev_Buzzer:
 		except:print(i2c_err_str.format(self.addr));return 1
 	def __init__(self,bus=_A,freq=_A,sda=_A,scl=_A,addr=_baseAddr,id=_A,volume=2):
 		self.i2c=create_unified_i2c(bus=bus,freq=freq,sda=sda,scl=scl);a=addr
-		if type(id)is list:assert max(id)<=1 and min(id)>=0 and len(id)is 4,'id must be a list of 1/0, length=4';self.addr=_baseAddr+id[0]+2*id[1]+4*id[2]+8*id[3]
+		if type(id)is list and not all((v==0 for v in id)):assert max(id)<=1 and min(id)>=0 and len(id)is 4,'id must be a list of 1/0, length=4';self.addr=8+id[0]+2*id[1]+4*id[2]+8*id[3]
 		else:self.addr=addr
 		try:self.i2c.writeto_mem(self.addr,_regLED,b'\x01')
 		except Exception as e:print(i2c_err_str.format(self.addr));raise e
