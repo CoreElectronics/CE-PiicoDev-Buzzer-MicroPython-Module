@@ -16,7 +16,7 @@ bus | int | 0,1 | Raspberry Pi Pico: 0, Raspberry Pi: 1 | I2C Bus.  Ignored on M
 freq | int | 100-1000000 | Device dependent | I2C Bus frequency (Hz).  Ignored on Raspberry Pi
 sda | Pin | Device Dependent | Device Dependent | I2C SDA Pin. Implemented on Raspberry Pi Pico only
 scl | Pin | Device Dependent | Device Dependent | I2C SCL Pin. Implemented on Raspberry Pi Pico only
-addr | int | 0x08 <= addr <= 0x77 | 0x08 | Manually specify the address of the connected device. For when a sofware address is set on the device
+addr | int | 0x08 <= addr <= 0x77 | 0x5C | Manually specify the address of the connected device. For when a sofware address is set on the device
 id | List: [id1,id2,id3,id4] | (1=Closed, 0=Open). | [0,0,0,0] | Hardware switches change the device address - Abstracts the need for user to look up an address, simply input the switch positions. Alternatively, use `addr` for explicit address.
 volume | int | 0:2 | 2 | Set the buzzer volume 0=quietest -> 2=loudest
 
