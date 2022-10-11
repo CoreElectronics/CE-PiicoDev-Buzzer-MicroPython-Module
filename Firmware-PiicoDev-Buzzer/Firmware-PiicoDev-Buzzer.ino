@@ -38,7 +38,7 @@ enum eepromLocations {
 uint8_t oldAddress;
 
 // Hardware Connectins
-#if defined(__AVR_ATtiny806__) || defined(__AVR_ATtiny816__)
+#if defined(__AVR_ATtiny806__) || defined(__AVR_ATtiny816__) || defined(__AVR_ATtiny1606__) || defined(__AVR_ATtiny1616__)
 const uint8_t powerLedPin = PIN_PC2;
 const uint16_t buzzerPins[] = {PIN_PA3, PIN_PA1, PIN_PA2}; // In ascending order of loudness
 const uint16_t buzzerCommon = PIN_PA4; // provision for push-pull drive. Unused for now...
