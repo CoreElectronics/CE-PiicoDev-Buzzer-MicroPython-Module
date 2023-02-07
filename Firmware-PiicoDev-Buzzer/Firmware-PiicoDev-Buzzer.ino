@@ -1,11 +1,15 @@
 /*
- * PiicoDev 3x RGB LED Module Firmware
+ * PiicoDev Buzzer Module Firmware
  * Written by Michael Ruppe @ Core Electronics
  * Based off the Qwiic Button Project https://github.com/sparkfun/Qwiic_Button
- * Date: NOV 2021
- * An I2C based LED module that allows control of 3x GlowBit (WS2812) LEDs
+ * Date: FEB 2023
+ * An I2C based buzzer module that allows tone and timing control
  *
  * Feel like supporting PiicoDev? Buy a module here: https://core-electronics.com.au/catalog/product/view/sku/CE07910
+ *
+ * Changes in v2.0
+ *  The new v20 hardware has a louder buzzer and does not support volume control. Volume funcitons are still provisioned here but do nothing.
+ *  Pinout has changed significantly to facilitate routing the v20 hardware.
  *
  * Changes in v1.1
  *  Default address is now not shared with other smart modules
@@ -20,8 +24,8 @@
 #include <avr/sleep.h> // For sleep_mode
 #include <avr/power.h> // For powering-down peripherals such as ADC and Timers
 
-#define FIRMWARE_MAJOR 0x01
-#define FIRMWARE_MINOR 0x01
+#define FIRMWARE_MAJOR 0x02
+#define FIRMWARE_MINOR 0x00
 
 #define DEVICE_ID 0x51
 #define DEFAULT_I2C_ADDRESS 0x5C    // The default address when all switches are off
@@ -38,16 +42,14 @@ enum eepromLocations {
 uint8_t oldAddress;
 
 // Hardware Connectins
-#if defined(__AVR_ATtiny806__) || defined(__AVR_ATtiny816__) || defined(__AVR_ATtiny1606__) || defined(__AVR_ATtiny1616__)
-const uint8_t powerLedPin = PIN_PC2;
-const uint16_t buzzerPins[] = {PIN_PA3, PIN_PA1, PIN_PA2}; // In ascending order of loudness
-const uint16_t buzzerCommon = PIN_PA4; // provision for push-pull drive. Unused for now...
+#if defined(__AVR_ATtiny806__) || defined(__AVR_ATtiny816__) || defined(__AVR_ATtiny1606__) || defined(__AVR_ATtiny1616__) || defined(__AVR_ATtiny3217__)
+const uint8_t powerLedPin = PIN_PA3;
 uint16_t buzzerPin = PIN_PA2;
 
-const uint8_t addressPin1 = PIN_PA7;
-const uint8_t addressPin2 = PIN_PB5;
-const uint8_t addressPin3 = PIN_PA5;
-const uint8_t addressPin4 = PIN_PB2;
+const uint8_t addressPin1 = PIN_PA6;
+const uint8_t addressPin2 = PIN_PA7;
+const uint8_t addressPin3 = PIN_PB5;
+const uint8_t addressPin4 = PIN_PB4;
 #endif
 
 // Prototyping with Arduino Uno
@@ -105,7 +107,7 @@ const memoryMap registerMap = {
   .i2cAddress = 0x04,
   .tone = 0x05,
   .volume = 0x06,
-  .led = 0x07,
+  .led = 0x07
 };
 
 volatile memoryMap valueMap = {
@@ -154,8 +156,6 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Begin");
 #endif
-
-  pinMode(buzzerCommon, OUTPUT); digitalWrite(buzzerCommon, LOW);
 
   // Pull up address pins
   pinMode(addressPin1, INPUT_PULLUP);

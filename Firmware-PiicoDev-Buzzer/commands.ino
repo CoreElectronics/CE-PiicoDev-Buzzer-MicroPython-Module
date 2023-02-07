@@ -24,18 +24,13 @@ void playTone(uint16_t frequency, uint16_t duration) {
 }
 
 void setVolume(char *data) {
-  uint8_t vol = data[0];
-  if (vol >=0 && vol < COUNT_OF(buzzerPins)) volume(uint8_t(data[0]));
+  // This function is deprecated in v2.0 firmware
+  return;
 }
 
 void volume(uint8_t vol) {
-  // Reset all buzzer pins
-  for (uint8_t i = 0; i < COUNT_OF(buzzerPins); i++) {
-    pinMode(buzzerPins[i], INPUT);
-  }
-  // Select the desired pin to use
-  buzzerPin = buzzerPins[vol];
-  pinMode(buzzerPin, OUTPUT);
+  // This function is deprecated in v2.0 firmware
+  return;
 }
 
 
