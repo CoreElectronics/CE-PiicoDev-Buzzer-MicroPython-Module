@@ -10,6 +10,7 @@
  * Changes in v2.0
  *  The new v20 hardware has a louder buzzer and does not support volume control. Volume funcitons are still provisioned here but do nothing.
  *  Pinout has changed significantly to facilitate routing the v20 hardware.
+ *  There is also a self-test utility that checks address pins are not shorted together during PCBA
  *
  * Changes in v1.1
  *  Default address is now not shared with other smart modules
@@ -96,6 +97,7 @@ struct memoryMap {
   uint16_t tone;
   uint8_t volume;
   uint8_t led;
+  uint8_t selfTestResult;
 };
 
 // Register addresses.
@@ -107,7 +109,8 @@ const memoryMap registerMap = {
   .i2cAddress = 0x04,
   .tone = 0x05,
   .volume = 0x06,
-  .led = 0x07
+  .led = 0x07,
+  .selfTestResult = 0x09
 };
 
 volatile memoryMap valueMap = {
@@ -118,7 +121,8 @@ volatile memoryMap valueMap = {
   .i2cAddress = DEFAULT_I2C_ADDRESS,
   .tone = 0x00,
   .volume = 0x00,
-  .led = 0x01
+  .led = 0x01,
+  .selfTestResult = 0x00
 };
 
 uint8_t currentRegisterNumber;
@@ -136,6 +140,7 @@ void setAddress(char *data);
 void setTone(char *data);
 void setVolume(char *data);
 void setPowerLed(char *data);
+void getSelfTest(char *data);
 
 functionMap functions[] = {
   {registerMap.id, idReturn},
@@ -146,6 +151,7 @@ functionMap functions[] = {
   {registerMap.tone, setTone},
   {registerMap.volume, setVolume},
   {registerMap.led, setPowerLed},
+  {registerMap.selfTestResult, getSelfTest},
 };
 
 
