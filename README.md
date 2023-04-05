@@ -34,6 +34,7 @@ Stop the buzzer
 
 
 ### PiicoDev_Buzzer.volume(volume)
+**Deprecated in v20 hardware**
 Set the buzzer volume 0=quietest -> 2=loudest
 
 Parameter | Type | Description
