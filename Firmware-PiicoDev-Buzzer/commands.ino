@@ -24,18 +24,13 @@ void playTone(uint16_t frequency, uint16_t duration) {
 }
 
 void setVolume(char *data) {
-  uint8_t vol = data[0];
-  if (vol >=0 && vol < COUNT_OF(buzzerPins)) volume(uint8_t(data[0]));
+  // This function is deprecated in v2.0 firmware
+  return;
 }
 
 void volume(uint8_t vol) {
-  // Reset all buzzer pins
-  for (uint8_t i = 0; i < COUNT_OF(buzzerPins); i++) {
-    pinMode(buzzerPins[i], INPUT);
-  }
-  // Select the desired pin to use
-  buzzerPin = buzzerPins[vol];
-  pinMode(buzzerPin, OUTPUT);
+  // This function is deprecated in v2.0 firmware
+  return;
 }
 
 
@@ -87,6 +82,60 @@ void setAddress(char *data) {
   valueMap.status |= (1 << STATUS_LAST_COMMAND_SUCCESS);
   updateFlag = true; // will trigger a I2C re-initalise and save custom address to EEPROM
 }
+
+
+void getSelfTest(char *data) {
+  runSelfTest();
+  loadArray(valueMap.selfTestResult);
+}
+
+void runSelfTest(void){
+  const bool FAIL = false;
+  const bool PASS = true;
+  bool state = PASS;
+
+  // Check for shorts between address pins
+  uint8_t numPins = 4;
+  uint16_t pins[] = {addressPin1, addressPin2, addressPin3, addressPin4};
+
+  // Set all pins as input with pullup
+  for (uint8_t i=0; i<numPins; i++){
+    pinMode(pins[i], INPUT_PULLUP);
+  }
+  // Test Address Pin 1 against all others
+  pinMode(pins[0], OUTPUT);
+  digitalWrite(pins[0], LOW);
+  if (digitalRead(pins[1]) == 0) state = FAIL;
+  if (digitalRead(pins[2]) == 0) state = FAIL;
+  if (digitalRead(pins[3]) == 0) state = FAIL;
+  pinMode(pins[0], INPUT_PULLUP);
+
+  // Test Address Pin 2 against remaining pins
+  pinMode(pins[1], OUTPUT);
+  digitalWrite(pins[1], LOW);
+  if (digitalRead(pins[2]) == 0) state = FAIL;
+  if (digitalRead(pins[3]) == 0) state = FAIL;
+  pinMode(pins[1], INPUT_PULLUP);
+
+  // Test Address Pin 3 against remaining pins
+  pinMode(pins[2], OUTPUT);
+  digitalWrite(pins[2], LOW);
+  if (digitalRead(pins[3]) == 0) state = FAIL;
+  pinMode(pins[2], INPUT_PULLUP);
+
+  // Every address pin has now been tested against every other pin
+
+  // Check LED pin is not shorted to adjacent GND pin.
+  pinMode(powerLedPin, INPUT_PULLUP); // enter test state
+  digitalRead(powerLedPin);
+  if (digitalRead(powerLedPin) == 0) state = FAIL;
+  pinMode(powerLedPin, OUTPUT);
+  digitalWrite(powerLedPin, valueMap.led); // return the LED to the desired state
+
+  valueMap.selfTestResult = state;
+}
+
+
 
 
 //Loads a long into the start of the responseBuffer
